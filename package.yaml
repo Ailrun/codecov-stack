@@ -28,6 +28,8 @@ library:
   ## Common fields
   source-dirs:
     - src
+  dependencies:
+    - hpc >= 0.6 && < 0.7
   ## Library fields
   # exposed:
   # exposed-modules:
