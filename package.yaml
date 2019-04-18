@@ -3,7 +3,7 @@ name:                               codecov-stack
 version:                            0.1.0.0
 # synopsis:
 # description:
-category:                           Control
+category:                           CLI, Control
 homepage:                           https://github.com/Ailrun/codecov-stack#readme
 bug-reports:                        https://github.com/Ailrun/codecov-stack/issues
 author:                             Junyoung Clare Jang
