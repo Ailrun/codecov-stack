@@ -1,0 +1,19 @@
+# Haskell
+*.hi
+*.o
+*.prof
+
+# Hpack
+*.cabal
+
+# Cabal
+.cabal-sandbox/
+cabal.project.local
+
+# Haskell Tool Stack
+.stack-work/
+dist/
+
+# Emacs
+.dir-locals.el
+*~
