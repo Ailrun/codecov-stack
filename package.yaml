@@ -30,6 +30,7 @@ library:
     - src
   dependencies:
     - hpc >= 0.6 && < 0.7
+    - http-conduit >= 2.3 && < 3
   ## Library fields
   # exposed:
   # exposed-modules:
