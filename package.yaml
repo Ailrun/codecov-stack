@@ -1,11 +1,12 @@
 spec-version:                       0.31.0
-name:                               codecov-stack
+name:                               codecov
 version:                            0.1.0.0
 # synopsis:
-# description:
+description: >
+  CLI for supporting Codecov with HPC coverage of Haskell
 category:                           CLI, Control
-homepage:                           https://github.com/Ailrun/codecov-stack#readme
-bug-reports:                        https://github.com/Ailrun/codecov-stack/issues
+homepage:                           https://github.com/Ailrun/haskell-codecov#readme
+bug-reports:                        https://github.com/Ailrun/haskell-codecov/issues
 author:                             Junyoung Clare Jang
 maintainer:                         jjc9310@gmail.com
 copyright:                          2019 Junyoung Clare Jang
@@ -18,7 +19,7 @@ extra-source-files:
 # extra-doc-files:
 # data-files:
 # data-dir:
-github:                             Ailrun/codecov-stack
+github:                             Ailrun/haskell-codecov
 # custom-setup:
   # dependencies:
 
@@ -45,7 +46,7 @@ library:
 # internal-libraries:
 
 executables:
-  codecov-stack:
+  codecov:
     ## Common fields
     source-dirs:
       - app
@@ -54,7 +55,7 @@ executables:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - codecov-stack
+      - codecov
     ## Executable fields
     main:                           Main.hs
     # other-modules:
@@ -63,7 +64,7 @@ executables:
 # executable:
 
 tests:
-  codecov-stack-test:
+  codecov-test:
     ## Common fields
     source-dirs:
       - test
@@ -72,7 +73,7 @@ tests:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - codecov-stack
+      - codecov
       - hspec
     ## Test fields
     main:                           Spec.hs
