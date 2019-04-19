@@ -1,12 +1,37 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Codecov.Api.Upload where
 
+import Data.Aeson ( FromJSON, Value )
+import Data.Function
 import Data.Maybe
-import Data.List
+import Data.String ( IsString, fromString )
+import Network.HTTP.Simple
+import Network.HTTP.Conduit
 import Numeric
 
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BSL
 import qualified Codecov.SupportedCis as SupportedCis
 
-defaultOptions :: String -> Options
+send :: ApiVersion -> Options -> BSL.ByteString -> IO (Response Value)
+send ApiV2 options report = httpJSON request
+  where
+    request
+      = apiUrl
+        & parseRequest_
+        & setRequestQueryString query
+        & setRequestMethod "POST"
+        & setRequestHeaders headers
+        & setRequestBodyLBS report
+
+    apiUrl = createApiUrl ApiV2
+    query = createQuery options
+    headers
+      = [ ("Accept", "application/json")
+        ]
+send _ _ _ = error "Codecov.Api.Upload.send: Other versions than v2 are not implemented yet."
+
+defaultOptions :: BS.ByteString -> Options
 defaultOptions commit
   = Options
     { oCommit = commit
@@ -23,48 +48,44 @@ defaultOptions commit
     , oPr = Nothing
     }
 
-createBaseApiUrl :: ApiVersion -> String
-createBaseApiUrl v = "https://codecov.io/upload/" <> show v
+createApiUrl :: ApiVersion -> String
+createApiUrl v = "https://codecov.io/upload/" <> apiVersionToByteString v
 
 -- |
 -- Do I need to check safeness of option values?
-createQuery :: Options -> String
+createQuery :: Options -> Query
 createQuery o
-  = intercalate "&" queryParts
-  where
-    queryParts
-      = map toQueryPart
-        . mapMaybe sequence
-        $ [ ("commit", Just (oCommit o))
-          , ("token", oToken o)
-          , ("branch", oBranch o)
-          , ("build", fmap (flip showInt "") (oBuild o))
-          , ("job", fmap (flip showInt "") (oJob o))
-          , ("build_url", oBuildUrl o)
-          , ("name", oName o)
-          , ("slug", fmap show (oSlug o))
-          , ("yaml", oYaml o)
-          , ("service", fmap show (oService o))
-          , ("flags", fmap showFlags (oFlags o))
-          , ("pr", fmap (flip showInt "") (oPr o))
-          ]
+  = fmap (fmap Just)
+    . mapMaybe sequence
+    $
+    [ ("commit", Just (oCommit o))
+    , ("token", oToken o)
+    , ("branch", oBranch o)
+    , ("build", fmap toStringLike (oBuild o))
+    , ("job", fmap toStringLike (oJob o))
+    , ("build_url", oBuildUrl o)
+    , ("name", oName o)
+    , ("slug", fmap toStringLike (oSlug o))
+    , ("yaml", oYaml o)
+    , ("service", fmap toStringLike (oService o))
+    , ("flags", fmap flagsToByteString (oFlags o))
+    , ("pr", fmap toStringLike (oPr o))
+    ]
 
-    toQueryPart (k, v) = k <> "=" <> v
-
-createApiUrl :: ApiVersion -> Options -> String
-createApiUrl v q = createBaseApiUrl v <> "?" <> createQuery q
+toStringLike :: (Show a, IsString b) => a -> b
+toStringLike = fromString . show
 
 data Options
   = Options
-    { oCommit :: String
-    , oToken :: Maybe String
-    , oBranch :: Maybe String
+    { oCommit :: BS.ByteString
+    , oToken :: Maybe BS.ByteString
+    , oBranch :: Maybe BS.ByteString
     , oBuild :: Maybe Int
     , oJob :: Maybe Int
-    , oBuildUrl :: Maybe String
-    , oName :: Maybe String
+    , oBuildUrl :: Maybe BS.ByteString
+    , oName :: Maybe BS.ByteString
     , oSlug :: Maybe Slug
-    , oYaml :: Maybe String
+    , oYaml :: Maybe BS.ByteString
     , oService :: Maybe SupportedCis.Type
     , oFlags :: Maybe Flags
     , oPr :: Maybe Int
@@ -73,26 +94,25 @@ data Options
            , Show
            )
 
-type Flags = [String]
+type Flags = [BS.ByteString]
 
-showFlags :: Flags -> String
-showFlags = intercalate ","
+flagsToByteString :: Flags -> BS.ByteString
+flagsToByteString = BS.intercalate ","
 
-data Slug = Slug { sOwner :: String, sRepo :: String }
+data Slug = Slug { sOwner :: BS.ByteString, sRepo :: BS.ByteString }
   deriving ( Eq
+           , Show
            )
-
-instance Show Slug where
-  show (Slug owner repo) = owner <> "/" <> repo
 
 data ApiVersion
   = ApiV2
   | ApiV4
   | ApiV5
   deriving ( Eq
+           , Show
            )
 
-instance Show ApiVersion where
-  show ApiV2 = "v2"
-  show ApiV4 = "v4"
-  show ApiV5 = "v5"
+apiVersionToByteString :: ApiVersion -> String
+apiVersionToByteString ApiV2 = "v2"
+apiVersionToByteString ApiV4 = "v4"
+apiVersionToByteString ApiV5 = "v5"
