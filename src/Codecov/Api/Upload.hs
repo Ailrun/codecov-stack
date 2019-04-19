@@ -10,10 +10,10 @@ import Network.HTTP.Conduit
 import Numeric
 
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Lazy as LBS
 import qualified Codecov.SupportedCis as SupportedCis
 
-send :: ApiVersion -> Options -> BSL.ByteString -> IO (Response Value)
+send :: ApiVersion -> Options -> LBS.ByteString -> IO (Response Value)
 send ApiV2 options report = httpJSON request
   where
     request
