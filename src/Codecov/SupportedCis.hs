@@ -1,4 +1,4 @@
-module Codecov.Api.SupportedCis where
+module Codecov.SupportedCis where
 
 data Type
   = Travis

@@ -4,7 +4,7 @@ import Data.Maybe
 import Data.List
 import Numeric
 
-import qualified Codecov.Api.SupportedCis as SupportedCis
+import qualified Codecov.SupportedCis as SupportedCis
 
 defaultOptions :: String -> Options
 defaultOptions commit
